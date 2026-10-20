@@ -1,7 +1,7 @@
 import os, datetime, random, requests
 
 TOKEN = os.environ["BOT_TOKEN"]
-CHAT = os.environ["CHANNEL_ID"]
+CHAT = "@minecraftrapidnews"
 API = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
 
 
