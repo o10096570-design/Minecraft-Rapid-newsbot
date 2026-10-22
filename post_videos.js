@@ -90,6 +90,38 @@ function parseVideos(xml) {
   }));
 }
 
+// Thumbnail photo + title + creator credit + "Watch" button
+async function postVideo(v) {
+  const link = `https://www.youtube.com/watch?v=${v.id}`;
+  const title = v.title.length > 200 ? v.title.slice(0, 197) + "..." : v.title;
+  const caption = `${title}\n\nby ${v.author}\n${link}`;
+  const reply_markup = {
+    inline_keyboard: [[{ text: "▶ Watch on YouTube", url: link }]],
+  };
+
+  const thumbs = [
+    `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
+    `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
+  ];
+
+  for (const photo of thumbs) {
+    try {
+      await tg("sendPhoto", { chat_id: CHAT, photo, caption, reply_markup });
+      return;
+    } catch (e) {
+      console.error("thumbnail fail:", e.message);
+    }
+  }
+
+  // aakhri bachao: sirf link bhejo (bada preview ke saath)
+  await tg("sendMessage", {
+    chat_id: CHAT,
+    text: caption,
+    reply_markup,
+    link_preview_options: { url: link, prefer_large_media: true },
+  });
+}
+
 async function main() {
   const candidates = [];
 
@@ -120,10 +152,7 @@ async function main() {
   for (const v of candidates) {
     if (sent >= MAX_POSTS_PER_RUN) break;
     try {
-      await tg("sendMessage", {
-        chat_id: CHAT,
-        text: `${v.title}\n\nby ${v.author}\nhttps://www.youtube.com/watch?v=${v.id}`,
-      });
+      await postVideo(v);
       posted.push(v.id);
       sent++;
       console.log("Posted:", v.id, v.title);
