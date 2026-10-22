@@ -19,140 +19,140 @@ if (!TOKEN) {
 const QUESTIONS = [
   {
     type: "poll",
-    q: "Sabse best biome kaunsa hai?",
+    q: "Sabse best biome kaunsa hai? / Which biome is the best?",
     options: ["Plains", "Forest", "Mountains", "Desert", "Cherry Grove"],
   },
   {
     type: "quiz",
-    q: "Creeper kis janwar se darta hai aur door bhaagta hai?",
+    q: "Creeper kis janwar se darta hai? / Which animal scares creepers away?",
     options: ["Wolf", "Cat", "Villager", "Iron Golem"],
     correct: 1,
-    explain: "Creepers cats (aur ocelots) se door bhaagte hain. Cat paas rakho, creeper se bacho!",
+    explain: "Creepers cats se door bhaagte hain. / Creepers run away from cats.",
   },
   {
     type: "poll",
-    q: "Tumhara favourite mob kaunsa hai?",
+    q: "Tumhara favourite mob kaunsa hai? / What is your favourite mob?",
     options: ["Creeper", "Enderman", "Axolotl", "Wolf", "Villager"],
   },
   {
     type: "quiz",
-    q: "Nether portal ka frame kis block se banta hai?",
+    q: "Nether portal ka frame kis block se banta hai? / Which block is a Nether portal frame made of?",
     options: ["Stone", "Obsidian", "Bedrock", "Netherrack"],
     correct: 1,
-    explain: "Nether portal obsidian se banta hai (minimum 10 blocks) aur flint and steel se jalta hai.",
+    explain: "Portal obsidian se banta hai aur flint and steel se jalta hai. / A portal is built from obsidian and lit with flint and steel.",
   },
   {
     type: "poll",
-    q: "Java ya Bedrock, tum kaunsa khelte ho?",
-    options: ["Java", "Bedrock (mobile/console)", "Dono"],
+    q: "Java ya Bedrock, tum kaunsa khelte ho? / Java or Bedrock, which one do you play?",
+    options: ["Java", "Bedrock (mobile/console)", "Both"],
   },
   {
     type: "quiz",
-    q: "Wither banane ke liye kitni Wither Skeleton skulls chahiye?",
+    q: "Wither banane ke liye kitni Wither Skeleton skulls chahiye? / How many Wither Skeleton skulls do you need to summon the Wither?",
     options: ["1", "2", "3", "4"],
     correct: 2,
-    explain: "Wither ke liye 3 Wither Skeleton skulls aur 4 Soul Sand/Soul Soil chahiye hote hain.",
+    explain: "3 skulls aur 4 Soul Sand/Soul Soil lagte hain. / You need 3 skulls and 4 Soul Sand or Soul Soil.",
   },
   {
     type: "poll",
-    q: "Survival mein sabse pehle kya karte ho?",
-    options: ["Ped kaatna", "Ghar banana", "Khana dhundhna", "Mining"],
+    q: "Survival mein sabse pehle kya karte ho? / What do you do first in Survival?",
+    options: ["Cut trees", "Build a house", "Find food", "Go mining"],
   },
   {
     type: "quiz",
-    q: "Netherite Ingot banane ke liye 4 Netherite Scrap ke saath kya chahiye?",
+    q: "4 Netherite Scrap ke saath kya chahiye Netherite Ingot ke liye? / What goes with 4 Netherite Scrap to craft a Netherite Ingot?",
     options: ["4 Iron Ingots", "4 Gold Ingots", "4 Diamonds", "4 Emeralds"],
     correct: 1,
-    explain: "4 Netherite Scrap + 4 Gold Ingots = 1 Netherite Ingot.",
+    explain: "4 Scrap + 4 Gold Ingots se ek Netherite Ingot banta hai. / 4 Scrap + 4 Gold Ingots make one Netherite Ingot.",
   },
   {
     type: "poll",
-    q: "Best weapon kaunsa hai?",
+    q: "Best weapon kaunsa hai? / Which is the best weapon?",
     options: ["Sword", "Axe", "Bow", "Trident", "Mace"],
   },
   {
     type: "quiz",
-    q: "Villagers trade mein kaunsi cheez (currency) lete aur dete hain?",
+    q: "Villagers kis currency se trade karte hain? / What currency do villagers trade with?",
     options: ["Gold Ingot", "Emerald", "Diamond", "Iron Ingot"],
     correct: 1,
-    explain: "Villagers ki main currency Emerald hai.",
+    explain: "Villagers ki main currency Emerald hai. / Emerald is the main currency of villagers.",
   },
   {
     type: "poll",
-    q: "Tumhara favourite dimension kaunsa hai?",
+    q: "Tumhara favourite dimension kaunsa hai? / What is your favourite dimension?",
     options: ["Overworld", "Nether", "The End"],
   },
   {
     type: "quiz",
-    q: "Warden kis biome mein milta hai?",
+    q: "Warden kis biome mein milta hai? / Which biome do you find the Warden in?",
     options: ["Lush Caves", "Deep Dark", "Dripstone Caves", "Mushroom Fields"],
     correct: 1,
-    explain: "Warden Deep Dark biome ke Ancient Cities mein milta hai. Chup chaap chalna!",
+    explain: "Warden Deep Dark ke Ancient Cities mein milta hai. Chup chaap chalo! / The Warden lives in the Ancient Cities of the Deep Dark. Sneak quietly!",
   },
   {
     type: "poll",
-    q: "Sabse irritating mob kaunsa hai?",
+    q: "Sabse irritating mob kaunsa hai? / Which is the most annoying mob?",
     options: ["Creeper", "Phantom", "Skeleton", "Silverfish", "Pillager"],
   },
   {
     type: "quiz",
-    q: "Survival mode mein kaunsa block normal tareeke se toda nahi ja sakta?",
+    q: "Survival mein kaunsa block normal tareeke se nahi tootta? / Which block cannot be broken normally in Survival?",
     options: ["Obsidian", "Bedrock", "Diamond Block", "Netherite Block"],
     correct: 1,
-    explain: "Bedrock survival mein normal tareeke se nahi tootta.",
+    explain: "Bedrock survival mein normal tareeke se nahi tootta. / Bedrock cannot be broken normally in Survival mode.",
   },
   {
     type: "poll",
-    q: "Tum Minecraft kis device pe khelte ho?",
+    q: "Tum Minecraft kis device pe khelte ho? / Which device do you play Minecraft on?",
     options: ["Mobile", "PC / Laptop", "Console"],
   },
   {
     type: "quiz",
-    q: "Phantoms kab spawn hote hain?",
+    q: "Phantoms kab spawn hote hain? / When do Phantoms spawn?",
     options: [
-      "Zyada mining karne pe",
-      "Kuch din bina soye rehne pe",
-      "Barish mein",
-      "Sirf Nether mein",
+      "When you mine a lot",
+      "When you don't sleep for days",
+      "During rain",
+      "Only in the Nether",
     ],
     correct: 1,
-    explain: "Kuch in-game din bina soye rehne pe Phantoms aate hain. Bed use karo!",
+    explain: "Kuch din bina soye rehne pe Phantoms aate hain. Bed use karo! / Phantoms appear if you go several days without sleeping. Use a bed!",
   },
   {
     type: "poll",
-    q: "Best pet kaunsa hai?",
+    q: "Best pet kaunsa hai? / Which is the best pet?",
     options: ["Wolf", "Cat", "Parrot", "Horse", "Axolotl"],
   },
   {
     type: "quiz",
-    q: "Elytra (udne wale wings) kahan milta hai?",
-    options: ["Nether Fortress", "End City ke ship mein", "Ocean Monument", "Village"],
+    q: "Elytra (udne wale wings) kahan milta hai? / Where can you find the Elytra (gliding wings)?",
+    options: ["Nether Fortress", "End City ship", "Ocean Monument", "Village"],
     correct: 1,
-    explain: "Elytra End Cities ke End Ship mein item frame mein milta hai.",
+    explain: "Elytra End City ke End Ship mein item frame mein milta hai. / The Elytra is in an item frame on an End Ship in an End City.",
   },
   {
     type: "poll",
-    q: "Kaunsa game mode pasand hai?",
+    q: "Kaunsa game mode pasand hai? / Which game mode do you like?",
     options: ["Survival", "Creative", "Hardcore", "Adventure"],
   },
   {
     type: "quiz",
-    q: "Bijli girne pe pig kya ban jata hai?",
+    q: "Pig pe bijli girne se wo kya ban jata hai? / What does a pig turn into when struck by lightning?",
     options: ["Zombie", "Zombified Piglin", "Piglin Brute", "Hoglin"],
     correct: 1,
-    explain: "Pig pe bijli girne se wo Zombified Piglin ban jata hai.",
+    explain: "Pig Zombified Piglin ban jata hai. / A pig becomes a Zombified Piglin.",
   },
   {
     type: "poll",
-    q: "Ghar kis block ka banana pasand karte ho?",
+    q: "Ghar kis block ka banana pasand karte ho? / What do you like to build your house with?",
     options: ["Wood", "Stone / Cobblestone", "Bricks", "Quartz / Glass"],
   },
   {
     type: "quiz",
-    q: "Axolotl ko pakadne ke liye kya chahiye?",
+    q: "Axolotl ko pakadne ke liye kya chahiye? / What do you need to catch an Axolotl?",
     options: ["Water Bucket", "Lava Bucket", "Milk Bucket", "Net"],
     correct: 0,
-    explain: "Axolotl ko Water Bucket se pakda ja sakta hai.",
+    explain: "Axolotl ko Water Bucket se pakda ja sakta hai. / You can catch an Axolotl with a Water Bucket.",
   },
 ];
 
@@ -183,12 +183,12 @@ function validate(o, type) {
     .slice(0, 6)
     .map((s) => s.slice(0, 90));
   if (options.length < 2) return null;
-  const item = { type, q: o.q.trim().slice(0, 250), options };
+  const item = { type, q: o.q.trim().slice(0, 285), options };
   if (type === "quiz") {
     const c = Number(o.correct);
     if (!Number.isInteger(c) || c < 0 || c >= options.length || !o.explain) return null;
     item.correct = c;
-    item.explain = String(o.explain).slice(0, 190);
+    item.explain = String(o.explain).slice(0, 195);
   }
   return item;
 }
@@ -245,10 +245,10 @@ async function generateWithAI(type, recent) {
   const prompt = `Tum ek Minecraft expert ho. Telegram channel ke liye ek ${
     isQuiz ? "quiz sawaal (sirf ek sahi jawab)" : "opinion poll sawaal"
   } banao. Topic: ${topic}.
-Bhasha: friendly Hinglish (Roman Hindi + English Minecraft words).
-Rules: sirf pakke aur sahi Minecraft facts likho, andaza mat lagao. Sawaal 200 characters se chhota. 3 se 5 options, har option 60 characters se chhota.${
+Bhasha: sawaal DONO bhashaon mein likho. Pehle friendly Hinglish (Roman Hindi), phir " / " laga ke usi ka English version. Misal: "Sabse best biome kaunsa hai? / Which biome is the best?". Options simple English mein rakho (Minecraft ke naam, chhote).
+Rules: sirf pakke aur sahi Minecraft facts likho, andaza mat lagao. 'q' dono bhasha milake 270 characters se chhota. 3 se 5 options, har option 60 characters se chhota.${
     isQuiz
-      ? " 'correct' mein sahi option ka index (0 se shuru) do aur 'explain' mein 150 characters se chhota explanation do."
+      ? " 'correct' mein sahi option ka index (0 se shuru) do aur 'explain' mein pehle Hinglish phir English (dono milake 180 characters se chhota) explanation do."
       : ""
   }
 Ye sawaal pehle aa chuke hain, inhe ya inse milte-julte mat banao:
