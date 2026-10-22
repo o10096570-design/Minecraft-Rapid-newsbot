@@ -8,7 +8,7 @@ const fs = require("fs");
 const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
 const CHAT = process.env.TELEGRAM_CHANNEL || "@minecraftrapidnews";
 const SUBREDDITS = ["Minecraft", "MinecraftMemes"];
-const MAX_POSTS_PER_RUN = 3;
+const MAX_POSTS_PER_RUN = 1;
 const MIN_SCORE = 300; // sirf popular posts
 const POSTED_FILE = "posted.json";
 
@@ -43,7 +43,7 @@ async function getMemes(sub) {
 
 function makeCaption(m) {
   const title = m.title.length > 200 ? m.title.slice(0, 197) + "..." : m.title;
-  return `😂 ${title}\n\nCredit: u/${m.author} on r/${m.subreddit}\n${m.postLink}\n\n#Minecraft #MinecraftMemes\n📢 @minecraftrapidnews`;
+  return `😂😄🤧 ${title}\n\nCredit: u/${m.author} on r/${m.subreddit}\n${m.postLink}\n\n#Minecraft #MinecraftMemes\n📢 @minecraftrapidnews`;
 }
 
 async function main() {
