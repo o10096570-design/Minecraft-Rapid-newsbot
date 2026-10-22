@@ -7,11 +7,16 @@ const fs = require("fs");
 const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
 const CHAT = process.env.TELEGRAM_CHANNEL || "@minecraftrapidnews";
 
-// YouTube handles (bina @ ke)
-const HANDLES = ["IMTIYANO", "rodieeno", "sillytrollcore", "KiLLeRs_Anas"];
+// Channel IDs (verified)
+const CHANNELS = [
+  { name: "IMTIYANO", id: "UCR86w7GYzQhYJvNHO5QeUzA" },
+  { name: "RODIEENO", id: "UCjBN6VhzOiJr52TayrXKD9A" },
+  { name: "SillyTroll", id: "UCGfncqvN4RGTFDrHuDFKqEQ" },
+  { name: "KiLLeRs | Anas", id: "UComdhq9zb8N6Qw7OvpOyDBg" },
+];
 
-const MAX_POSTS_PER_RUN = 2;
-const MAX_AGE_HOURS = 72; // sirf pichle 3 din ke videos
+const MAX_POSTS_PER_RUN = 1; // 4 runs/din x 1 = roz 4 videos
+const MAX_AGE_HOURS = 24 * 365; // purane videos bhi chalenge (naye pehle jayenge)
 const POSTED_FILE = "posted_videos.json";
 
 if (!TOKEN) {
@@ -30,6 +35,8 @@ const HEADERS = {
   Cookie: "CONSENT=YES+1; SOCS=CAI",
 };
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function tg(method, body) {
   const res = await fetch(`https://api.telegram.org/bot${TOKEN}/${method}`, {
     method: "POST",
@@ -41,20 +48,6 @@ async function tg(method, body) {
   return data;
 }
 
-async function getChannelId(handle) {
-  const res = await fetch(`https://www.youtube.com/@${handle}`, {
-    headers: HEADERS,
-  });
-  if (!res.ok) throw new Error(`@${handle}: page HTTP ${res.status}`);
-  const html = await res.text();
-  const m =
-    html.match(/channel_id=(UC[\w-]{22})/) ||
-    html.match(/"channelId":"(UC[\w-]{22})"/) ||
-    html.match(/"externalId":"(UC[\w-]{22})"/);
-  if (!m) throw new Error(`@${handle}: channel id nahi mila`);
-  return m[1];
-}
-
 function decode(s) {
   return s
     .replace(/&amp;/g, "&")
@@ -64,13 +57,30 @@ function decode(s) {
     .replace(/&#39;/g, "'");
 }
 
-async function getVideos(channelId) {
-  const res = await fetch(
+// Do alag feed URLs try karta hai (kabhi ek 404 deta hai, doosra chal jata hai)
+async function fetchFeed(channelId) {
+  const urls = [
     `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-    { headers: HEADERS }
-  );
-  if (!res.ok) throw new Error(`feed ${channelId}: HTTP ${res.status}`);
-  const xml = await res.text();
+    // uploads playlist: UC... -> UU...
+    `https://www.youtube.com/feeds/videos.xml?playlist_id=UU${channelId.slice(2)}`,
+  ];
+  let lastErr = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { headers: HEADERS });
+        if (res.ok) return await res.text();
+        lastErr = `HTTP ${res.status}`;
+      } catch (e) {
+        lastErr = e.message;
+      }
+    }
+    await sleep(1500);
+  }
+  throw new Error(`feed ${channelId}: ${lastErr}`);
+}
+
+function parseVideos(xml) {
   const entries = xml.split("<entry>").slice(1);
   return entries.map((e) => ({
     id: (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1],
@@ -83,11 +93,11 @@ async function getVideos(channelId) {
 async function main() {
   const candidates = [];
 
-  for (const handle of HANDLES) {
+  for (const ch of CHANNELS) {
     try {
-      const channelId = await getChannelId(handle);
-      const videos = await getVideos(channelId);
-      console.log(`@${handle}: ${videos.length} videos mile`);
+      const xml = await fetchFeed(ch.id);
+      const videos = parseVideos(xml);
+      console.log(`${ch.name}: ${videos.length} videos mile`);
       for (const v of videos) {
         if (!v.id || isNaN(v.published)) continue;
         const ageHours = (Date.now() - v.published.getTime()) / 36e5;
@@ -96,9 +106,12 @@ async function main() {
         candidates.push(v);
       }
     } catch (e) {
-      console.error(e.message);
+      console.error(`${ch.name}: ${e.message}`);
     }
+    await sleep(500);
   }
+
+  console.log(`${candidates.length} naye video(s) candidate hain`);
 
   // sabse naye pehle
   candidates.sort((a, b) => b.published - a.published);
