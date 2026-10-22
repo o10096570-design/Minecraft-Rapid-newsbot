@@ -94,7 +94,7 @@ function parseVideos(xml) {
 async function postVideo(v) {
   const link = `https://www.youtube.com/watch?v=${v.id}`;
   const title = v.title.length > 200 ? v.title.slice(0, 197) + "..." : v.title;
-  const caption = `${title}\n\nby ${v.author}\n${link}`;
+  const caption = `🎬 ${title}\n\nby ${v.author}\n${link}\n\n#Minecraft #MinecraftVideos\n📢 @minecraftrapidnews`;
   const reply_markup = {
     inline_keyboard: [[{ text: "▶ Watch on YouTube", url: link }]],
   };
