@@ -122,13 +122,64 @@ async function postVideo(v) {
   });
 }
 
+// Backup: feed 404 de toh channel ke /videos aur /shorts pages se video IDs nikalta hai
+async function scrapeChannel(ch) {
+  const out = [];
+  for (const tab of ["videos", "shorts"]) {
+    try {
+      const res = await fetch(`https://www.youtube.com/channel/${ch.id}/${tab}`, {
+        headers: HEADERS,
+      });
+      if (!res.ok) {
+        console.error(`${ch.name}/${tab}: page HTTP ${res.status}`);
+        continue;
+      }
+      const html = await res.text();
+      const seen = new Set();
+      const re = /"videoId":"([\w-]{11})"/g;
+      let m;
+      let idx = 0;
+      while ((m = re.exec(html)) && idx < 15) {
+        if (seen.has(m[1])) continue;
+        seen.add(m[1]);
+        const win = html.slice(m.index, m.index + 1500);
+        const t =
+          win.match(/"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)*)"/) ||
+          win.match(/"(?:headline|title)":\{"simpleText":"((?:[^"\\]|\\.)*)"/);
+        let title = `New video from ${ch.name}`;
+        if (t) {
+          try {
+            title = JSON.parse(`"${t[1]}"`);
+          } catch (_) {}
+        }
+        out.push({
+          id: m[1],
+          title,
+          author: ch.name,
+          // page se date nahi milti, isliye order ke hisaab se nakli date
+          published: new Date(Date.now() - (idx + (tab === "shorts" ? 0.5 : 0)) * 36e5),
+        });
+        idx++;
+      }
+    } catch (e) {
+      console.error(`${ch.name}/${tab}: ${e.message}`);
+    }
+  }
+  return out;
+}
+
 async function main() {
   const candidates = [];
 
   for (const ch of CHANNELS) {
     try {
-      const xml = await fetchFeed(ch.id);
-      const videos = parseVideos(xml);
+      let videos;
+      try {
+        videos = parseVideos(await fetchFeed(ch.id));
+      } catch (e) {
+        console.error(`${ch.name}: feed fail (${e.message}), page se try kar raha hu`);
+        videos = await scrapeChannel(ch);
+      }
       console.log(`${ch.name}: ${videos.length} videos mile`);
       for (const v of videos) {
         if (!v.id || isNaN(v.published)) continue;
