@@ -43,7 +43,7 @@ async function getMemes(sub) {
 
 function makeCaption(m) {
   const title = m.title.length > 200 ? m.title.slice(0, 197) + "..." : m.title;
-  return `${title}\n\nCredit: u/${m.author} on r/${m.subreddit}\n${m.postLink}`;
+  return `😂 ${title}\n\nCredit: u/${m.author} on r/${m.subreddit}\n${m.postLink}\n\n#Minecraft #MinecraftMemes\n📢 @minecraftrapidnews`;
 }
 
 async function main() {
@@ -68,14 +68,24 @@ async function main() {
       if (sent >= MAX_POSTS_PER_RUN) break;
       if (m.nsfw || m.spoiler || m.ups < MIN_SCORE) continue;
       if (posted.includes(m.postLink)) continue;
-      if (!/\.(jpe?g|png)$/i.test(m.url)) continue;
+      const isGif = /\.gif$/i.test(m.url);
+      if (!isGif && !/\.(jpe?g|png)$/i.test(m.url)) continue;
 
       try {
-        await tg("sendPhoto", {
-          chat_id: CHAT,
-          photo: m.url,
-          caption: makeCaption(m),
-        });
+        if (isGif) {
+          // GIF / animation
+          await tg("sendAnimation", {
+            chat_id: CHAT,
+            animation: m.url,
+            caption: makeCaption(m),
+          });
+        } else {
+          await tg("sendPhoto", {
+            chat_id: CHAT,
+            photo: m.url,
+            caption: makeCaption(m),
+          });
+        }
         posted.push(m.postLink);
         sent++;
         console.log("Posted:", m.postLink);
