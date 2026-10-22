@@ -1,219 +1,253 @@
-// post_videos.js - YouTube channels ke naye videos ka link Telegram channel pe post karta hai
-// Telegram link ka preview + play button khud dikha deta hai.
-// Node 18+ chahiye (fetch built-in hai).
+// Minecraft Rapid newsBot 🎮
+// YouTube videos → Telegram channel
 
-const fs = require("fs");
+const TOKEN =
+  process.env.BOT_TOKEN ||
+  process.env.TELEGRAM_BOT_TOKEN;
 
-const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
-const CHAT = process.env.TELEGRAM_CHANNEL || "@minecraftrapidnews";
+const CHAT =
+  process.env.TELEGRAM_CHAT_ID ||
+  "@minecraftrapidnews";
 
-// Channel IDs (verified)
+const MAX_POSTS_PER_RUN = 1;
+const MAX_AGE_HOURS = 24 * 365;
+
 const CHANNELS = [
-  { name: "IMTIYANO", id: "UCR86w7GYzQhYJvNHO5QeUzA" },
-  { name: "RODIEENO", id: "UCjBN6VhzOiJr52TayrXKD9A" },
-  { name: "SillyTroll", id: "UCGfncqvN4RGTFDrHuDFKqEQ" },
-  { name: "KiLLeRs | Anas", id: "UComdhq9zb8N6Qw7OvpOyDBg" },
+  {
+    name: "IMTIYANO",
+    id: "UCR86w7GYzQhYJvNHO5QeUzA"
+  },
+  {
+    name: "RODIEENO",
+    id: "UCjBN6VhzOiJr52TayrXKD9A"
+  },
+  {
+    name: "SillyTroll",
+    id: "UCGfncqvN4RGTFDrHuDFKqEQ"
+  },
+  {
+    name: "KiLLeRs | Anas",
+    id: "UComdhq9zb8N6Qw7OvpOyDBg"
+  }
 ];
 
-const MAX_POSTS_PER_RUN = 1; // 4 runs/din x 1 = roz 4 videos
-const MAX_AGE_HOURS = 24 * 365; // purane videos bhi chalenge (naye pehle jayenge)
-const POSTED_FILE = "posted_videos.json";
+const fs = require("fs");
+const path = require("path");
+
+const POSTED_FILE = path.join(
+  process.cwd(),
+  "posted_videos.json"
+);
 
 if (!TOKEN) {
-  console.error("BOT_TOKEN missing");
-  process.exit(1);
+  throw new Error("Telegram bot token is missing!");
 }
-
-const posted = fs.existsSync(POSTED_FILE)
-  ? JSON.parse(fs.readFileSync(POSTED_FILE, "utf8"))
-  : [];
 
 const HEADERS = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-  "Accept-Language": "en-US,en;q=0.9",
-  Cookie: "CONSENT=YES+1; SOCS=CAI",
+  "User-Agent": "Mozilla/5.0 (compatible; MinecraftRadarBot/1.0)"
 };
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function tg(method, data) {
+  const response = await fetch(
+    `https://api.telegram.org/bot${TOKEN}/${method}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+  );
 
-async function tg(method, body) {
-  const res = await fetch(`https://api.telegram.org/bot${TOKEN}/${method}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  if (!data.ok) throw new Error(`${method} failed: ${data.description}`);
-  return data;
+  const result = await response.json();
+
+  if (!result.ok) {
+    throw new Error(
+      result.description || "Telegram API error"
+    );
+  }
+
+  return result;
 }
 
-function decode(s) {
-  return s
+function decode(text = "") {
+  return text
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) =>
+      String.fromCodePoint(Number(n))
+    )
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) =>
+      String.fromCodePoint(parseInt(n, 16))
+    );
 }
 
-// Do alag feed URLs try karta hai (kabhi ek 404 deta hai, doosra chal jata hai)
-async function fetchFeed(channelId) {
-  const urls = [
-    `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-    // uploads playlist: UC... -> UU...
-    `https://www.youtube.com/feeds/videos.xml?playlist_id=UU${channelId.slice(2)}`,
-  ];
-  let lastErr = "";
-  for (let attempt = 0; attempt < 2; attempt++) {
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, { headers: HEADERS });
-        if (res.ok) return await res.text();
-        lastErr = `HTTP ${res.status}`;
-      } catch (e) {
-        lastErr = e.message;
-      }
-    }
-    await sleep(1500);
+function loadPosted() {
+  try {
+    return JSON.parse(
+      fs.readFileSync(POSTED_FILE, "utf8")
+    );
+  } catch {
+    return [];
   }
-  throw new Error(`feed ${channelId}: ${lastErr}`);
 }
 
-function parseVideos(xml) {
+function savePosted(ids) {
+  fs.writeFileSync(
+    POSTED_FILE,
+    JSON.stringify(ids.slice(-1000), null, 2)
+  );
+}
+
+async function getChannelVideos(channel) {
+  const feedUrl =
+    `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+
+  const response = await fetch(feedUrl, {
+    headers: HEADERS
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `YouTube feed error for ${channel.name}: ${response.status}`
+    );
+  }
+
+  const xml = await response.text();
   const entries = xml.split("<entry>").slice(1);
-  return entries.map((e) => ({
-    id: (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1],
-    title: decode((e.match(/<title>([^<]*)<\/title>/) || [])[1] || ""),
-    published: new Date((e.match(/<published>([^<]+)<\/published>/) || [])[1]),
-    author: decode((e.match(/<name>([^<]*)<\/name>/) || [])[1] || ""),
-  }));
+
+  return entries.map(entry => {
+    const id =
+      (entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1];
+
+    const rawTitle =
+      (entry.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || "";
+
+    const published =
+      (entry.match(/<published>([^<]+)<\/published>/) || [])[1];
+
+    const author =
+      (entry.match(/<name>([\s\S]*?)<\/name>/) || [])[1];
+
+    return {
+      id,
+      title: decode(rawTitle),
+      published: published ? new Date(published) : new Date(0),
+      author: decode(author || channel.name),
+      url: `https://www.youtube.com/watch?v=${id}`
+    };
+  }).filter(video => video.id && video.title);
 }
 
-// Thumbnail photo + title + creator credit + "Watch" button
-async function postVideo(v) {
-  const link = `https://www.youtube.com/watch?v=${v.id}`;
-  const title = v.title.length > 200 ? v.title.slice(0, 197) + "..." : v.title;
-  const caption = `🎬 ${title}\n\nby ${v.author}\n${link}\n\n#Minecraft #MinecraftVideos\n📢 @minecraftrapidnews`;
-  const reply_markup = {
-    inline_keyboard: [[{ text: "▶ Watch on YouTube", url: link }]],
+async function postVideo(video) {
+  const channelName = video.author || "Minecraft Creator";
+
+  const title = video.title.length > 850
+    ? video.title.slice(0, 847) + "..."
+    : video.title;
+
+  const caption =
+    `🔥 ${title}\n\n` +
+    `🎮 Minecraft Videos\n` +
+    `📺 Channel: ${channelName}\n\n` +
+    `📢 @minecraftrapidnews`;
+
+  const keyboard = {
+    inline_keyboard: [[
+      {
+        text: "▶ Watch on YouTube",
+        url: video.url
+      }
+    ]]
   };
 
-  const thumbs = [
-    `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
-    `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
+  const thumbnails = [
+    `https://i.ytimg.com/vi/${video.id}/maxresdefault.jpg`,
+    `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`
   ];
 
-  for (const photo of thumbs) {
+  for (const photo of thumbnails) {
     try {
-      await tg("sendPhoto", { chat_id: CHAT, photo, caption, reply_markup });
+      await tg("sendPhoto", {
+        chat_id: CHAT,
+        photo,
+        caption,
+        reply_markup: keyboard
+      });
+
+      console.log("Posted video:", video.title);
       return;
-    } catch (e) {
-      console.error("thumbnail fail:", e.message);
+    } catch (error) {
+      console.log("Thumbnail failed:", error.message);
     }
   }
 
-  // aakhri bachao: sirf link bhejo (bada preview ke saath)
   await tg("sendMessage", {
     chat_id: CHAT,
     text: caption,
-    reply_markup,
-    link_preview_options: { url: link, prefer_large_media: true },
+    disable_web_page_preview: true,
+    reply_markup: keyboard
   });
-}
 
-// Backup: feed 404 de toh channel ke /videos aur /shorts pages se video IDs nikalta hai
-async function scrapeChannel(ch) {
-  const out = [];
-  for (const tab of ["videos", "shorts"]) {
-    try {
-      const res = await fetch(`https://www.youtube.com/channel/${ch.id}/${tab}`, {
-        headers: HEADERS,
-      });
-      if (!res.ok) {
-        console.error(`${ch.name}/${tab}: page HTTP ${res.status}`);
-        continue;
-      }
-      const html = await res.text();
-      const seen = new Set();
-      const re = /"videoId":"([\w-]{11})"/g;
-      let m;
-      let idx = 0;
-      while ((m = re.exec(html)) && idx < 15) {
-        if (seen.has(m[1])) continue;
-        seen.add(m[1]);
-        const win = html.slice(m.index, m.index + 1500);
-        const t =
-          win.match(/"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)*)"/) ||
-          win.match(/"(?:headline|title)":\{"simpleText":"((?:[^"\\]|\\.)*)"/);
-        let title = `New video from ${ch.name}`;
-        if (t) {
-          try {
-            title = JSON.parse(`"${t[1]}"`);
-          } catch (_) {}
-        }
-        out.push({
-          id: m[1],
-          title,
-          author: ch.name,
-          // page se date nahi milti, isliye order ke hisaab se nakli date
-          published: new Date(Date.now() - (idx + (tab === "shorts" ? 0.5 : 0)) * 36e5),
-        });
-        idx++;
-      }
-    } catch (e) {
-      console.error(`${ch.name}/${tab}: ${e.message}`);
-    }
-  }
-  return out;
+  console.log("Posted without thumbnail:", video.title);
 }
 
 async function main() {
-  const candidates = [];
+  const posted = loadPosted();
+  const postedSet = new Set(posted);
+  const cutoff =
+    Date.now() - MAX_AGE_HOURS * 60 * 60 * 1000;
 
-  for (const ch of CHANNELS) {
+  let videos = [];
+
+  for (const channel of CHANNELS) {
     try {
-      let videos;
-      try {
-        videos = parseVideos(await fetchFeed(ch.id));
-      } catch (e) {
-        console.error(`${ch.name}: feed fail (${e.message}), page se try kar raha hu`);
-        videos = await scrapeChannel(ch);
-      }
-      console.log(`${ch.name}: ${videos.length} videos mile`);
-      for (const v of videos) {
-        if (!v.id || isNaN(v.published)) continue;
-        const ageHours = (Date.now() - v.published.getTime()) / 36e5;
-        if (ageHours > MAX_AGE_HOURS) continue;
-        if (posted.includes(v.id)) continue;
-        candidates.push(v);
-      }
-    } catch (e) {
-      console.error(`${ch.name}: ${e.message}`);
-    }
-    await sleep(500);
-  }
+      const channelVideos = await getChannelVideos(channel);
 
-  console.log(`${candidates.length} naye video(s) candidate hain`);
+      videos.push(...channelVideos);
 
-  // sabse naye pehle
-  candidates.sort((a, b) => b.published - a.published);
-
-  let sent = 0;
-  for (const v of candidates) {
-    if (sent >= MAX_POSTS_PER_RUN) break;
-    try {
-      await postVideo(v);
-      posted.push(v.id);
-      sent++;
-      console.log("Posted:", v.id, v.title);
-    } catch (e) {
-      console.error("Skip", v.id, e.message);
+      console.log(
+        `Fetched ${channelVideos.length} videos from ${channel.name}`
+      );
+    } catch (error) {
+      console.error(
+        `Could not fetch ${channel.name}:`,
+        error.message
+      );
     }
   }
 
-  fs.writeFileSync(POSTED_FILE, JSON.stringify(posted.slice(-500), null, 2));
-  console.log(`Done. ${sent} video(s) sent.`);
+  videos = videos
+    .filter(video =>
+      video.id &&
+      video.title &&
+      video.published.getTime() >= cutoff &&
+      !postedSet.has(video.id)
+    )
+    .sort((a, b) =>
+      b.published.getTime() - a.published.getTime()
+    );
+
+  const selected = videos.slice(0, MAX_POSTS_PER_RUN);
+
+  if (selected.length === 0) {
+    console.log("No new eligible videos found.");
+    return;
+  }
+
+  for (const video of selected) {
+    await postVideo(video);
+
+    posted.push(video.id);
+    postedSet.add(video.id);
+    savePosted(posted);
+  }
 }
 
-main();
+main().catch(error => {
+  console.error("Bot failed:", error);
+  process.exitCode = 1;
+});
