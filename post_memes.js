@@ -1,4 +1,5 @@
-// post_memes.js - Reddit se top Minecraft memes uthake Telegram channel pe post karta hai
+// post_memes.js - Minecraft memes Telegram channel pe post karta hai
+// Reddit seedha GitHub ko block karta hai (403), isliye meme-api.com use karte hain.
 // Har post ke saath original creator ka credit + link jata hai.
 // Node 18+ chahiye (fetch built-in hai).
 
@@ -8,7 +9,7 @@ const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
 const CHAT = process.env.TELEGRAM_CHANNEL || "@minecraftrapidnews";
 const SUBREDDITS = ["Minecraft", "MinecraftMemes"];
 const MAX_POSTS_PER_RUN = 3;
-const MIN_SCORE = 500; // sirf viral posts
+const MIN_SCORE = 300; // sirf popular posts
 const POSTED_FILE = "posted.json";
 
 if (!TOKEN) {
@@ -31,19 +32,18 @@ async function tg(method, body) {
   return data;
 }
 
-async function getTopPosts(sub) {
-  const res = await fetch(
-    `https://www.reddit.com/r/${sub}/top.json?t=day&limit=25`,
-    { headers: { "User-Agent": "minecraft-rapid-newsbot/1.0" } }
-  );
-  if (!res.ok) throw new Error(`Reddit ${sub}: HTTP ${res.status}`);
+async function getMemes(sub) {
+  const res = await fetch(`https://meme-api.com/gimme/${sub}/30`, {
+    headers: { "User-Agent": "minecraft-rapid-newsbot/1.0" },
+  });
+  if (!res.ok) throw new Error(`meme-api ${sub}: HTTP ${res.status}`);
   const json = await res.json();
-  return json.data.children.map((c) => c.data);
+  return json.memes || [];
 }
 
-function makeCaption(p) {
-  const title = p.title.length > 200 ? p.title.slice(0, 197) + "..." : p.title;
-  return `${title}\n\nCredit: u/${p.author} on r/${p.subreddit}\nhttps://reddit.com${p.permalink}`;
+function makeCaption(m) {
+  const title = m.title.length > 200 ? m.title.slice(0, 197) + "..." : m.title;
+  return `${title}\n\nCredit: u/${m.author} on r/${m.subreddit}\n${m.postLink}`;
 }
 
 async function main() {
@@ -52,42 +52,35 @@ async function main() {
   for (const sub of SUBREDDITS) {
     if (sent >= MAX_POSTS_PER_RUN) break;
 
-    let posts;
+    let memes;
     try {
-      posts = await getTopPosts(sub);
+      memes = await getMemes(sub);
     } catch (e) {
       console.error(e.message);
       continue;
     }
+    console.log(`${sub}: ${memes.length} memes mile`);
 
-    for (const p of posts) {
+    // sabse popular pehle
+    memes.sort((a, b) => b.ups - a.ups);
+
+    for (const m of memes) {
       if (sent >= MAX_POSTS_PER_RUN) break;
-      if (p.over_18 || p.stickied || p.score < MIN_SCORE) continue;
-      if (posted.includes(p.id)) continue;
+      if (m.nsfw || m.spoiler || m.ups < MIN_SCORE) continue;
+      if (posted.includes(m.postLink)) continue;
+      if (!/\.(jpe?g|png)$/i.test(m.url)) continue;
 
       try {
-        if (p.post_hint === "image" && /\.(jpe?g|png)$/i.test(p.url)) {
-          // Photo / meme
-          await tg("sendPhoto", {
-            chat_id: CHAT,
-            photo: p.url,
-            caption: makeCaption(p),
-          });
-        } else if (p.is_video) {
-          // Video: Reddit video mein audio alag hoti hai, isliye link bhejte hain
-          // Telegram khud preview dikha deta hai
-          await tg("sendMessage", {
-            chat_id: CHAT,
-            text: makeCaption(p),
-          });
-        } else {
-          continue; // baaki types skip
-        }
-        posted.push(p.id);
+        await tg("sendPhoto", {
+          chat_id: CHAT,
+          photo: m.url,
+          caption: makeCaption(m),
+        });
+        posted.push(m.postLink);
         sent++;
-        console.log("Posted:", p.id, p.title);
+        console.log("Posted:", m.postLink);
       } catch (e) {
-        console.error("Skip", p.id, e.message);
+        console.error("Skip", m.postLink, e.message);
       }
     }
   }
