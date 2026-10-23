@@ -1,12 +1,12 @@
-// post_poll.js - Roz ek Minecraft poll ya quiz Telegram channel pe post karta hai
-// Sawaal list mein se ek ke baad ek aata hai, khatam hone pe dobara shuru.
+// post_poll.js - Minecraft poll ya quiz Telegram channel/group pe post karta hai
+// AI se naya sawaal banwata hai, fail hone pe neeche ki list use hoti hai.
 // Node 18+ chahiye (fetch built-in hai).
 
 const fs = require("fs");
 
 const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
 const CHAT = process.env.TELEGRAM_CHANNEL || "@minecraftrapidnews";
-const STATE_FILE = "poll_state.json";
+const STATE_FILE = process.env.POLL_STATE_FILE || "poll_state.json";
 const GROQ_KEY = process.env.GROQ_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
@@ -289,7 +289,7 @@ async function main() {
   state.count = state.count || 0;
   state.recent = state.recent || [];
 
-  // ek din poll, ek din quiz
+  // ek baar poll, ek baar quiz
   const wantType = state.count % 2 === 0 ? "poll" : "quiz";
   let item = await generateWithAI(wantType, state.recent);
   let i = -1;
@@ -304,7 +304,8 @@ async function main() {
     chat_id: CHAT,
     question: `⛏️ ${item.q}`,
     options: item.options,
-    is_anonymous: true, // channels mein poll anonymous hi hota hai
+    // channel mein poll anonymous hi hota hai; group mein POLL_ANONYMOUS=false se votes dikhte hain
+    is_anonymous: process.env.POLL_ANONYMOUS !== "false",
   };
 
   if (item.type === "quiz") {
