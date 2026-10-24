@@ -1,0 +1,46 @@
+{
+  "tutorial_url": "",
+  "group_url": "",
+  "shaders": [
+    {
+      "name": "SmooTea Shader",
+      "creator": "Azion Studios (AziFy)",
+      "tier": "low",
+      "version": "4.6 (MC 26.40+)",
+      "description": "Low-end phones ke liye smooth shader. MB Loader chahiye. / Smooth shader for low-end phones. Needs MB Loader.",
+      "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/azifysmootea",
+      "file": "shaders/SmooTea_v4.6.mcpack",
+      "enabled": true
+    },
+    {
+      "name": "D'Shader",
+      "creator": "DrizarMC",
+      "tier": "low",
+      "version": "MC 1.26+",
+      "description": "Low-end phones ke liye halka shader, MB Loader ki zaroorat nahi. / Light shader for low-end phones, no MB Loader needed.",
+      "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/dshader-for-low-end-phones",
+      "file": "",
+      "enabled": true
+    },
+    {
+      "name": "RG Shader",
+      "creator": "RisabGamerz",
+      "tier": "low",
+      "version": "4.0 (MC 26.50)",
+      "description": "Low-end phones ke liye shader jo blocks ko sundar banata hai. / A low-end friendly shader that makes blocks look beautiful.",
+      "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/rg-shader-v2-1-renderdragon-support-2",
+      "file": "",
+      "enabled": true
+    },
+    {
+      "name": "Solar Shaders",
+      "creator": "CraftStudio",
+      "tier": "medium",
+      "version": "2.0.3 (MC 26.10+)",
+      "description": "Golden hour wale volumetric fog, god rays aur aurora. Thoda bhaari, medium phones ke liye. / Golden-hour fog, god rays and aurora. A bit heavier, for mid-range phones.",
+      "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/solar-shaders",
+      "file": "",
+      "enabled": true
+    }
+  ]
+}
