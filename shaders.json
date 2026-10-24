@@ -1,6 +1,6 @@
 {
-"tutorial_url": "https://t.me/minecraftrapidnews/31",
-"group_url": "https://t.me/+QhT_ms4D5WdjZmNl",
+  "tutorial_url": "https://t.me/minecraftrapidnews/31",
+  "group_url": "https://t.me/+QhT_ms4D5WdjZmNl",
   "shaders": [
     {
       "name": "SmooTea Shader",
@@ -9,7 +9,7 @@
       "version": "4.6 (MC 26.40+)",
       "description": "Low-end phones ke liye smooth shader. MB Loader chahiye. / Smooth shader for low-end phones. Needs MB Loader.",
       "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/azifysmootea",
-      "file": "shaders/SmooTea_v4.6.mcpack",
+      "file": "SmooTea_v4.6.mcpack",
       "enabled": true
     },
     {
@@ -19,7 +19,7 @@
       "version": "MC 1.26+",
       "description": "Low-end phones ke liye halka shader, MB Loader ki zaroorat nahi. / Light shader for low-end phones, no MB Loader needed.",
       "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/dshader-for-low-end-phones",
-      "file": "shaders/D_Shader.mcpack",
+      "file": "D_Shader.mcpack",
       "enabled": true
     },
     {
@@ -29,7 +29,7 @@
       "version": "4.0 (MC 26.50)",
       "description": "Low-end phones ke liye shader jo blocks ko sundar banata hai. / A low-end friendly shader that makes blocks look beautiful.",
       "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/rg-shader-v2-1-renderdragon-support-2",
-      "file": "shaders/RG_Shader_4.0.mcpack",
+      "file": "RG_Shader_4.0.mcpack",
       "enabled": true
     },
     {
@@ -39,7 +39,7 @@
       "version": "2.0.3 (MC 26.10+)",
       "description": "Golden hour wale volumetric fog, god rays aur aurora. Thoda bhaari, medium phones ke liye. / Golden-hour fog, god rays and aurora. A bit heavier, for mid-range phones.",
       "url": "https://www.curseforge.com/minecraft-bedrock/texture-packs/solar-shaders",
-      "file": "shaders/Solar_Shaders_2.0.3.mcpack",
+      "file": "Solar_Shaders_2.0.3.mcpack",
       "enabled": true
     }
   ]
