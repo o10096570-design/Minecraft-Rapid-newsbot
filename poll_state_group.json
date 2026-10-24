@@ -1,6 +1,6 @@
 {
   "next": 0,
-  "count": 13,
+  "count": 14,
   "recent": [
     "Aapko kaunsi potion sabse zyada useful lagti hai? / Which potion do you find most useful?",
     "Redstone repeater ka maximum delay kitna hota hai? / What is the maximum delay setting of a Redstone repeater?",
@@ -14,6 +14,7 @@
     "Awkward potion ko Healing potion me badalne ke liye kaun sa ingredient use hota hai? / Which ingredient turns an Awkward Potion into a Potion of Healing?",
     "Mobile players ke liye sabse efficient mining level kaunsa hai? / What is the most efficient mining level for mobile players?",
     "End island par dragon ko dobara spawn karne ke liye kaunse block ki zarurat hoti hai? / Which block is required to respawn the Ender Dragon on The End islands?",
-    "Minecraft me The End pehli baar kab add hua? / When was The End first added to Minecraft?"
+    "Minecraft me The End pehli baar kab add hua? / When was The End first added to Minecraft?",
+    "Sugarcane kitna upar tak naturally grow kar sakta hai? / Up to how many blocks high can sugar cane naturally grow?"
   ]
 }
