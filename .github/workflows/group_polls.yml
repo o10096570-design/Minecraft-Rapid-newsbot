@@ -2,10 +2,10 @@ name: Post group polls
 
 on:
   schedule:
-    # roz 10 baar, subah 9:00 se raat 10:30 tak (IST)
-    - cron: "30 3,6,9,12,15 * * *"
-    - cron: "0 5,8,11,14,17 * * *"
-  workflow_dispatch:
+    # roz 6 baar (IST: 9:00, 11:30, 2:00, 4:30, 7:00, 9:30 PM)
+    - cron: "30 3,8,13 * * *"
+    - cron: "0 6,11,16 * * *"
+  workflow_dispatch:        # manual test ke liye
 
 permissions:
   contents: write
