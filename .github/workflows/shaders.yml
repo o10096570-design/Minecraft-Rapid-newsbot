@@ -1,0 +1,32 @@
+name: Post shader of the day
+
+on:
+  schedule:
+    - cron: "30 13 * * *"   # roz 7:00 PM IST
+  workflow_dispatch:        # manual test ke liye
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Post next shader
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          OWNER_CHAT_ID: ${{ secrets.OWNER_CHAT_ID }}
+        run: node post_shader.js
+
+      - name: Save state
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add shader_state.json
+          git diff --staged --quiet || (git commit -m "Update shader state" && git pull --rebase && git push)
