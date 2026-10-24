@@ -101,11 +101,18 @@ async function main() {
 
   const s = list[state.next];
   const caption = buildCaption(s, cfg, state.round);
-  const buttons = [[{ text: "⬇️ Official Download", url: s.url }]];
+  const hasFile = !!(s.file && fs.existsSync(s.file));
+  const buttons = [];
+  if (hasFile && process.env.GITHUB_REPOSITORY) {
+    const branch = process.env.GITHUB_REF_NAME || "main";
+    const raw = `https://raw.githubusercontent.com/${process.env.GITHUB_REPOSITORY}/${branch}/${s.file.split("/").map(encodeURIComponent).join("/")}`;
+    buttons.push([{ text: "⚡ Direct Download", url: raw }]);
+  }
+  buttons.push([{ text: "⬇️ Official Download", url: s.url }]);
   if (cfg.tutorial_url) buttons.push([{ text: "📖 Kaise lagayein / How to install", url: cfg.tutorial_url }]);
   const markup = { inline_keyboard: buttons };
 
-  if (s.file && fs.existsSync(s.file)) {
+  if (hasFile) {
     await sendFile(s.file, caption, markup);
   } else {
     await tg("sendMessage", {
